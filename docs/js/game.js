@@ -10,6 +10,27 @@ export class Game {
         this.selectedPiece = null;
         this.gameId = null;
         this.boardState = {}; // { x: { z: { type, color } } }
+        this.initPieceInfoUI();
+    }
+
+    initPieceInfoUI() {
+        this.infoDiv = document.createElement('div');
+        this.infoDiv.id = 'piece-info-tooltip';
+        this.infoDiv.className = 'tooltip hidden';
+        document.body.appendChild(this.infoDiv);
+    }
+
+    showPieceInfo(userData) {
+        if (!userData.characterName) return;
+        this.infoDiv.innerHTML = `
+            <strong>${userData.characterName}</strong><br>
+            <span>Clasificación: ${userData.classification}</span>
+        `;
+        this.infoDiv.classList.remove('hidden');
+    }
+
+    hidePieceInfo() {
+        this.infoDiv.classList.add('hidden');
     }
 
     async startNewGame() {
@@ -111,7 +132,6 @@ export class Game {
             // Verificar Jaque al oponente
             if (ChessRules.isKingInCheck(this.turn, this.boardState)) {
                 console.log(`Check! ${this.turn} king is in danger.`);
-                // Aquí se podría implementar la lógica de jaque mate
             }
 
             return true;

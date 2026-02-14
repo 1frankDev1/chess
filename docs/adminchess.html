@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Chess - Gestionar Personajes</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app" class="admin-panel">
+        <header>
+            <h1>Panel de Administración Chess</h1>
+            <nav>
+                <a href="index.html">Volver al Juego</a>
+                <a href="personajes.html">Ir a Selección</a>
+                <button id="btn-logout-admin">Cerrar Sesión</button>
+            </nav>
+        </header>
+
+        <main id="admin-content">
+            <!-- Login simple para admin -->
+            <div id="admin-login" class="overlay">
+                <div class="auth-box">
+                    <h2>Login Admin</h2>
+                    <input type="text" id="admin-username" placeholder="Username">
+                    <input type="password" id="admin-password" placeholder="Password">
+                    <button id="btn-login-admin">Entrar</button>
+                    <div id="admin-login-error" class="error"></div>
+                </div>
+            </div>
+
+            <!-- Panel de gestión -->
+            <div id="admin-dashboard" class="hidden">
+                <section class="add-character">
+                    <h3>Agregar Nuevo Personaje</h3>
+                    <form id="form-add-character">
+                        <input type="text" id="char-name" placeholder="Nombre del Personaje" required>
+                        <select id="char-piece-type" required>
+                            <option value="">Seleccionar Clasificación...</option>
+                            <option value="Rey">Rey</option>
+                            <option value="Reina">Reina</option>
+                            <option value="Torre">Torre</option>
+                            <option value="Alfil">Alfil</option>
+                            <option value="Caballo">Caballo</option>
+                            <option value="Peón">Peón</option>
+                        </select>
+                        <select id="char-gltf-path" required>
+                            <option value="">Seleccionar GLTF del Storage...</option>
+                        </select>
+                        <button type="submit">Guardar Personaje</button>
+                    </form>
+                </section>
+
+                <section class="character-list">
+                    <h3>Personajes Registrados</h3>
+                    <table id="table-characters">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>GLTF</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Se llena dinámicamente -->
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="js/adminchess.js"></script>
+</body>
+</html>
