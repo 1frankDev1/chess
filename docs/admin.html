@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Chess - Gestionar Personajes</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app" class="admin-panel">
+        <header>
+            <h1>Panel de Administración Chess</h1>
+            <nav>
+                <a href="index.html" class="button">Volver al Juego</a>
+                <a href="personajes.html" class="button">Ir a Selección</a>
+                <button id="btn-logout-admin">Cerrar Sesión</button>
+            </nav>
+        </header>
+
+        <main id="admin-content">
+            <!-- Login simple para admin -->
+            <div id="admin-login" class="overlay">
+                <div class="auth-box">
+                    <h2>Login Admin</h2>
+                    <input type="text" id="admin-username" placeholder="Username">
+                    <input type="password" id="admin-password" placeholder="Password">
+                    <button id="btn-login-admin">Entrar</button>
+                    <div id="admin-login-error" class="error"></div>
+                </div>
+            </div>
+
+            <!-- Panel de gestión -->
+            <div id="admin-dashboard" class="hidden">
+                <div class="admin-grid">
+                    <section class="storage-list">
+                        <h3>Modelos en Storage (Bucket: spirits)</h3>
+                        <p>Selecciona un archivo para clasificarlo</p>
+                        <ul id="list-gltf-files" class="file-list">
+                            <!-- Se llena dinámicamente -->
+                        </ul>
+                    </section>
+
+                    <section class="classification-form">
+                        <h3>Clasificar Personaje</h3>
+                        <form id="form-add-character">
+                            <div class="form-group">
+                                <label>Archivo GLTF:</label>
+                                <input type="text" id="char-gltf-path" readonly required>
+                            </div>
+                            <div class="form-group">
+                                <label>Nombre del Personaje:</label>
+                                <input type="text" id="char-name" placeholder="Ej: Guerrero de Luz" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Clasificación de Pieza:</label>
+                                <select id="char-piece-type" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Rey">Rey</option>
+                                    <option value="Reina">Reina</option>
+                                    <option value="Torre">Torre</option>
+                                    <option value="Alfil">Alfil</option>
+                                    <option value="Caballo">Caballo</option>
+                                    <option value="Peón">Peón</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-primary">Guardar Personaje</button>
+                        </form>
+                    </section>
+                </div>
+
+                <hr>
+
+                <section class="character-list">
+                    <h3>Personajes Clasificados</h3>
+                    <table id="table-characters">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>GLTF</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Se llena dinámicamente -->
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="js/admin.js"></script>
+</body>
+</html>

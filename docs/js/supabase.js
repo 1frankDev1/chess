@@ -85,17 +85,17 @@ export async function saveUserSelection(userId, pieceType, characterId) {
 export async function getModelUrl(path) {
     const { data } = supabase
         .storage
-        .from('chess-models')
+        .from('spirits')
         .getPublicUrl(path);
     
     return data.publicUrl;
 }
 
-export async function listStorageFiles() {
+export async function listStorageFiles(prefix = '') {
     const { data, error } = await supabase
         .storage
-        .from('chess-models')
-        .list();
+        .from('spirits')
+        .list(prefix);
     if (error) throw error;
     return data;
 }
