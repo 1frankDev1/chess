@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Chess - Supabase</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Auth Section -->
+        <div id="auth-container" class="overlay">
+            <div class="auth-box">
+                <h1>Ajedrez 3D</h1>
+                <div id="login-form">
+                    <input type="email" id="email" placeholder="Email" required>
+                    <input type="password" id="password" placeholder="Password" required>
+                    <button id="btn-login">Iniciar Sesión</button>
+                    <button id="btn-register">Registrarse</button>
+                </div>
+                <div id="auth-error" class="error"></div>
+            </div>
+        </div>
+
+        <!-- Game UI -->
+        <div id="game-ui" class="hidden">
+            <div id="hud">
+                <div class="player-info">
+                    <span id="current-turn-display">Turno: Blanco</span>
+                </div>
+                <div class="controls">
+                    <button id="btn-reset">Reiniciar Partida</button>
+                    <button id="btn-logout">Cerrar Sesión</button>
+                </div>
+            </div>
+            <div id="loading-overlay" class="overlay hidden">
+                <div class="loader">Cargando assets...</div>
+            </div>
+        </div>
+
+        <!-- Canvas Container -->
+        <div id="canvas-container"></div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
