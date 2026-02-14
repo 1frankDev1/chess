@@ -1,6 +1,5 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 import { ChessRules } from './rules.js';
-import { updateGameState, createGame, getGame } from './supabase.js';
 
 export class Game {
     constructor(sceneManager, board, pieceManager) {
@@ -13,30 +12,10 @@ export class Game {
         this.boardState = {}; // { x: { z: { type, color } } }
     }
 
-    async startNewGame(whitePlayerId, blackPlayerId) {
+    async startNewGame() {
         this.turn = 'white';
         this.initBoardState();
         this.renderPieces();
-        
-        try {
-            const gameData = await createGame(whitePlayerId, blackPlayerId);
-            this.gameId = gameData.id;
-            await this.saveState();
-        } catch (error) {
-            console.error('Error creating game in Supabase:', error);
-        }
-    }
-
-    async loadGame(gameId) {
-        try {
-            const gameData = await getGame(gameId);
-            this.gameId = gameData.id;
-            this.boardState = gameData.board_state;
-            this.turn = gameData.current_turn;
-            this.renderPieces();
-        } catch (error) {
-            console.error('Error loading game from Supabase:', error);
-        }
     }
 
     initBoardState() {
@@ -129,8 +108,6 @@ export class Game {
             this.board.clearHighlights();
             this.turn = this.turn === 'white' ? 'black' : 'white';
 
-            await this.saveState();
-
             // Verificar Jaque al oponente
             if (ChessRules.isKingInCheck(this.turn, this.boardState)) {
                 console.log(`Check! ${this.turn} king is in danger.`);
@@ -141,15 +118,5 @@ export class Game {
         }
 
         return false;
-    }
-
-    async saveState() {
-        if (this.gameId) {
-            try {
-                await updateGameState(this.gameId, this.boardState, this.turn);
-            } catch (error) {
-                console.error('Error updating game state in Supabase:', error);
-            }
-        }
     }
 }

@@ -1,4 +1,3 @@
-import { supabase, signIn, signUp, signOut, onAuthStateChange, getActiveGame } from './supabase.js';
 import { SceneManager } from './scene.js';
 import { Board } from './board.js';
 import { PieceManager } from './pieces.js';
@@ -9,25 +8,15 @@ class Main {
     constructor() {
         this.initUI();
         this.initGame();
-        this.setupAuth();
+        this.showGame();
     }
 
     initUI() {
-        this.authContainer = document.getElementById('auth-container');
         this.gameUI = document.getElementById('game-ui');
-        this.emailInput = document.getElementById('email');
-        this.passwordInput = document.getElementById('password');
-        this.btnLogin = document.getElementById('btn-login');
-        this.btnRegister = document.getElementById('btn-register');
-        this.btnLogout = document.getElementById('btn-logout');
         this.btnReset = document.getElementById('btn-reset');
-        this.authError = document.getElementById('auth-error');
         this.turnDisplay = document.getElementById('current-turn-display');
         this.loadingOverlay = document.getElementById('loading-overlay');
 
-        this.btnLogin.addEventListener('click', () => this.handleLogin());
-        this.btnRegister.addEventListener('click', () => this.handleRegister());
-        this.btnLogout.addEventListener('click', () => this.handleLogout());
         this.btnReset.addEventListener('click', () => this.handleReset());
     }
 
@@ -42,74 +31,22 @@ class Main {
         this.animate();
     }
 
-    setupAuth() {
-        onAuthStateChange((event, session) => {
-            if (session) {
-                this.showGame(session.user);
-            } else {
-                this.showAuth();
-            }
-        });
-    }
-
-    async handleLogin() {
-        const email = this.emailInput.value;
-        const password = this.passwordInput.value;
-        try {
-            await signIn(email, password);
-        } catch (error) {
-            this.authError.textContent = error.message;
-        }
-    }
-
-    async handleRegister() {
-        const email = this.emailInput.value;
-        const password = this.passwordInput.value;
-        try {
-            await signUp(email, password);
-            alert('Registro exitoso. Revisa tu email para confirmar (si está activado).');
-        } catch (error) {
-            this.authError.textContent = error.message;
-        }
-    }
-
-    async handleLogout() {
-        try {
-            await signOut();
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
     async handleReset() {
         if (confirm('¿Reiniciar partida?')) {
-            const user = (await supabase.auth.getUser()).data.user;
-            if (user) {
-                await this.game.startNewGame(user.id, user.id); // Para demo, mismo jugador
-            }
+            await this.game.startNewGame();
         }
     }
 
-    async showGame(user) {
-        this.authContainer.classList.add('hidden');
+    async showGame() {
         this.gameUI.classList.remove('hidden');
         this.loadingOverlay.classList.remove('hidden');
 
         await this.pieceManager.loadModels();
         this.loadingOverlay.classList.add('hidden');
 
-        // Intentar retomar partida activa
-        const activeGame = await getActiveGame(user.id);
-        if (activeGame) {
-            await this.game.loadGame(activeGame.id);
-        } else if (!this.game.gameId) {
-            await this.game.startNewGame(user.id, user.id);
+        if (!this.game.gameId) {
+            await this.game.startNewGame();
         }
-    }
-
-    showAuth() {
-        this.authContainer.classList.remove('hidden');
-        this.gameUI.classList.add('hidden');
     }
 
     animate(time) {
