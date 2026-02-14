@@ -3,12 +3,12 @@ import { Board } from './board.js';
 import { PieceManager } from './pieces.js';
 import { Game } from './game.js';
 import { InputHandler } from './input.js';
+import { customSignIn, getCurrentUser, customSignOut } from './supabase.js';
 
 class Main {
     constructor() {
         this.initUI();
-        this.initGame();
-        this.showGame();
+        this.checkAuth();
     }
 
     initUI() {
@@ -17,7 +17,43 @@ class Main {
         this.turnDisplay = document.getElementById('current-turn-display');
         this.loadingOverlay = document.getElementById('loading-overlay');
 
+        // Auth UI
+        this.loginOverlay = document.getElementById('main-login');
+        this.usernameInput = document.getElementById('main-username');
+        this.passwordInput = document.getElementById('main-password');
+        this.btnLogin = document.getElementById('btn-login-main');
+        this.btnLogout = document.getElementById('btn-logout-main');
+        this.loginError = document.getElementById('main-login-error');
+
         this.btnReset.addEventListener('click', () => this.handleReset());
+        this.btnLogin.addEventListener('click', () => this.handleLogin());
+        this.btnLogout.addEventListener('click', () => this.handleLogout());
+    }
+
+    checkAuth() {
+        const user = getCurrentUser();
+        if (user) {
+            this.loginOverlay.classList.add('hidden');
+            this.initGame();
+        } else {
+            this.loginOverlay.classList.remove('hidden');
+        }
+    }
+
+    async handleLogin() {
+        const username = this.usernameInput.value;
+        const password = this.passwordInput.value;
+        try {
+            await customSignIn(username, password);
+            window.location.reload();
+        } catch (error) {
+            this.loginError.textContent = error.message;
+        }
+    }
+
+    handleLogout() {
+        customSignOut();
+        window.location.reload();
     }
 
     async initGame() {
@@ -29,6 +65,7 @@ class Main {
         this.inputHandler = new InputHandler(this.sceneManager, this.game, this.board);
 
         this.animate();
+        await this.showGame();
     }
 
     async handleReset() {
@@ -44,9 +81,7 @@ class Main {
         await this.pieceManager.loadModels();
         this.loadingOverlay.classList.add('hidden');
 
-        if (!this.game.gameId) {
-            await this.game.startNewGame();
-        }
+        await this.game.startNewGame();
     }
 
     animate(time) {
@@ -59,10 +94,11 @@ class Main {
             this.pieceManager.update(deltaTime);
         }
 
-        this.sceneManager.render();
+        if (this.sceneManager) {
+            this.sceneManager.render();
+        }
         
-        // Update turn display
-        if (this.game) {
+        if (this.game && this.turnDisplay) {
             const turnText = this.game.turn === 'white' ? 'Blanco' : 'Negro';
             this.turnDisplay.textContent = `Turno: ${turnText}`;
         }

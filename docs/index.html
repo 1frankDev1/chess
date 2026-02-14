@@ -22,7 +22,10 @@
                     <span id="current-turn-display">Turno: Blanco</span>
                 </div>
                 <div class="controls">
+                    <a href="personajes.html" class="button">Personajes</a>
+                    <a href="adminchess.html" class="button">Admin</a>
                     <button id="btn-reset">Reiniciar Partida</button>
+                    <button id="btn-logout-main">Cerrar Sesión</button>
                 </div>
             </div>
             <div id="loading-overlay" class="overlay hidden">
@@ -35,5 +38,15 @@
     </div>
 
     <script type="module" src="js/main.js"></script>
+    <div id="main-login" class="overlay hidden">
+        <div class="auth-box">
+            <h2>Bienvenido a Ajedrez 3D</h2>
+            <p>Inicia sesión para usar tus personajes personalizados</p>
+            <input type="text" id="main-username" placeholder="Username">
+            <input type="password" id="main-password" placeholder="Password">
+            <button id="btn-login-main">Entrar</button>
+            <div id="main-login-error" class="error"></div>
+        </div>
+    </div>
 </body>
 </html>
