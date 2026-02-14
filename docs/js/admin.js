@@ -26,7 +26,8 @@ class AdminChess {
 
         // Dashboard elements
         this.formAdd = document.getElementById('form-add-character');
-        this.gltfSelect = document.getElementById('char-gltf-path');
+        this.gltfInput = document.getElementById('char-gltf-path');
+        this.gltfList = document.getElementById('list-gltf-files');
         this.tableBody = document.querySelector('#table-characters tbody');
 
         this.btnLogin.addEventListener('click', () => this.handleLogin());
@@ -72,22 +73,50 @@ class AdminChess {
     async showDashboard() {
         this.loginSection.classList.add('hidden');
         this.dashboardSection.classList.remove('hidden');
-        await this.loadGltfList();
+        await this.loadStorageFiles();
         await this.loadCharacters();
     }
 
-    async loadGltfList() {
+    async loadStorageFiles(prefix = '') {
         try {
-            const files = await listStorageFiles();
-            this.gltfSelect.innerHTML = '<option value="">Seleccionar GLTF del Storage...</option>';
+            const files = await listStorageFiles(prefix);
+            if (prefix === '') this.gltfList.innerHTML = '';
+
             files.forEach(file => {
-                const option = document.createElement('option');
-                option.value = file.name;
-                option.textContent = file.name;
-                this.gltfSelect.appendChild(option);
+                if (file.name === '.emptyFolderPlaceholder') return;
+
+                const li = document.createElement('li');
+                li.className = 'file-item';
+
+                // If it looks like a folder (no metadata/id in some Supabase responses, or by name)
+                const isFolder = !file.metadata;
+
+                if (isFolder) {
+                    li.innerHTML = `<strong>📁 ${file.name}</strong>`;
+                    li.style.cursor = 'pointer';
+                    li.addEventListener('click', () => this.loadStorageFiles(prefix + file.name + '/'));
+                } else {
+                    li.innerHTML = `📄 ${file.name}`;
+                    li.addEventListener('click', () => {
+                        this.gltfInput.value = prefix + file.name;
+                        // Auto-fill name from file name without extension
+                        document.getElementById('char-name').value = file.name.split('.')[0];
+                    });
+                }
+                this.gltfList.appendChild(li);
             });
+
+            if (prefix !== '') {
+                const backLi = document.createElement('li');
+                backLi.innerHTML = '🔙 Volver';
+                backLi.style.fontWeight = 'bold';
+                backLi.style.cursor = 'pointer';
+                backLi.addEventListener('click', () => this.loadStorageFiles(''));
+                this.gltfList.prepend(backLi);
+            }
+
         } catch (error) {
-            console.error('Error listing files:', error);
+            console.error('Error listing storage files:', error);
         }
     }
 
@@ -118,7 +147,7 @@ class AdminChess {
         const character = {
             name: document.getElementById('char-name').value,
             piece_type: document.getElementById('char-piece-type').value,
-            gltf_path: document.getElementById('char-gltf-path').value
+            gltf_path: this.gltfInput.value
         };
 
         try {

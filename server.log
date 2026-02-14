@@ -1,0 +1,4 @@
+127.0.0.1 - - [14/Feb/2026 10:52:28] "GET /personajes.html HTTP/1.1" 200 -
+127.0.0.1 - - [14/Feb/2026 10:52:28] "GET /js/personajes.js HTTP/1.1" 200 -
+127.0.0.1 - - [14/Feb/2026 10:52:28] "GET /style.css HTTP/1.1" 200 -
+127.0.0.1 - - [14/Feb/2026 10:52:28] "GET /js/supabase.js HTTP/1.1" 200 -

@@ -1,16 +1,21 @@
+import * as THREE from 'three';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
 import {
     customSignIn,
     getCurrentUser,
     customSignOut,
     getCharacters,
     getUserSelections,
-    saveUserSelection
+    saveUserSelection,
+    getModelUrl
 } from './supabase.js';
 
 class PersonajesSelection {
     constructor() {
         this.pieceTypes = ['Rey', 'Reina', 'Torre', 'Alfil', 'Caballo', 'Peón'];
+        this.characters = [];
         this.initUI();
+        this.initThree();
         this.checkAuth();
     }
 
@@ -30,6 +35,86 @@ class PersonajesSelection {
         this.btnSave.addEventListener('click', () => this.saveSelections());
     }
 
+    initThree() {
+        const container = document.getElementById('model-viewer');
+        if (!container) return;
+
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0x222222);
+
+        this.camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        this.camera.position.set(0, 2, 5);
+
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(this.renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        this.scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 5, 5);
+        this.scene.add(directionalLight);
+
+        this.loader = new GLTFLoader();
+        this.currentModel = null;
+
+        this.animate();
+
+        window.addEventListener('resize', () => {
+            if (container.clientWidth > 0) {
+                this.camera.aspect = container.clientWidth / container.clientHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(container.clientWidth, container.clientHeight);
+            }
+        });
+    }
+
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        if (this.currentModel) {
+            this.currentModel.rotation.y += 0.01;
+        }
+        this.renderer.render(this.scene, this.camera);
+    }
+
+    async loadPreview(charId) {
+        const char = this.characters.find(c => c.id === charId);
+        if (!char) return;
+
+        if (this.currentModel) {
+            this.scene.remove(this.currentModel);
+        }
+
+        try {
+            const url = await getModelUrl(char.gltf_path);
+            this.loader.load(url, (gltf) => {
+                this.currentModel = gltf.scene;
+
+                // Center and scale model
+                const box = new THREE.Box3().setFromObject(this.currentModel);
+                const size = box.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scale = 2 / maxDim;
+                this.currentModel.scale.set(scale, scale, scale);
+
+                const center = box.getCenter(new THREE.Vector3());
+                this.currentModel.position.x = -center.x * scale;
+                this.currentModel.position.y = -center.y * scale;
+                this.currentModel.position.z = -center.z * scale;
+
+                this.scene.add(this.currentModel);
+
+                document.getElementById('selected-info').innerHTML = `
+                    <h4>${char.name}</h4>
+                    <p>Clasificación: ${char.piece_type}</p>
+                `;
+            });
+        } catch (e) {
+            console.error("Error loading preview", e);
+        }
+    }
+
     async checkAuth() {
         const user = getCurrentUser();
         if (user) {
@@ -44,7 +129,7 @@ class PersonajesSelection {
         const password = this.passwordInput.value;
         try {
             await customSignIn(username, password);
-            this.showDashboard();
+            window.location.reload();
         } catch (error) {
             this.loginError.textContent = error.message;
         }
@@ -68,7 +153,7 @@ class PersonajesSelection {
 
     async loadSelectionMenu() {
         try {
-            const characters = await getCharacters();
+            this.characters = await getCharacters();
             const user = getCurrentUser();
             const currentSelections = await getUserSelections(user.id);
 
@@ -81,9 +166,9 @@ class PersonajesSelection {
 
                 const select = document.createElement('select');
                 select.id = `select-${type}`;
-                select.innerHTML = `<option value="">Default (Chess Piece)</option>`;
+                select.innerHTML = `<option value="">Pieza Estándar</option>`;
 
-                const typeChars = characters.filter(c => c.piece_type === type);
+                const typeChars = this.characters.filter(c => c.piece_type === type);
                 typeChars.forEach(char => {
                     const option = document.createElement('option');
                     option.value = char.id;
@@ -93,6 +178,10 @@ class PersonajesSelection {
                     if (isSelected) option.selected = true;
 
                     select.appendChild(option);
+                });
+
+                select.addEventListener('change', (e) => {
+                    if (e.target.value) this.loadPreview(e.target.value);
                 });
 
                 categoryDiv.appendChild(select);
